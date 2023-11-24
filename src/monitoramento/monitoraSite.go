@@ -4,18 +4,18 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
 
-const tentativas = 3
-const delay = 5
+const tentativas = 4
+const delay = 3
 
 func main() {
-
-	leArquivo()
 
 	mensageIndrouction()
 
@@ -34,6 +34,7 @@ func main() {
 			fmt.Println("")
 			fmt.Println("logs")
 			fmt.Println("")
+			exibeLogs()
 		case 3:
 			fmt.Println("")
 			fmt.Println("Exit program")
@@ -76,22 +77,22 @@ func selectMenu() int {
 
 func monitoringInit() {
 
-	URLs := leArquivo()
+	URLs := leArquivoTxt()
 
-	for i := 0; i < tentativas; i++ {
+	for i := 0; i <= tentativas; i++ {
 
-		for _, sites := range URLs {
+		for _, listadesites := range URLs {
 
-			fmt.Println("testando a URL:", sites)
-			testSite(sites)
+			fmt.Println("testando a URL:", listadesites)
+			pingSite(listadesites)
 		}
 		time.Sleep(delay * time.Second)
 	}
 }
 
-func testSite(sites string) {
+func pingSite(pingURL string) {
 
-	resp, err := http.Get(sites)
+	resp, err := http.Get(pingURL)
 
 	if err != nil {
 		fmt.Println("Ocorreu um erro durante a execução:", err)
@@ -100,15 +101,17 @@ func testSite(sites string) {
 	}
 
 	if resp.StatusCode == 200 {
-		fmt.Println("O site:", sites, "está sem problemas")
+		fmt.Println("O site:", pingURL, "está sem problemas")
+		registraLog(pingURL, true)
 		fmt.Println("")
 	} else {
-		fmt.Println("o site:", sites, "está com problemas, o status HTTP do site é", resp.StatusCode)
+		fmt.Println("o site:", pingURL, "está com problemas, o status HTTP do site é", resp.StatusCode)
+		registraLog(pingURL, false)
 		fmt.Println("")
 	}
 }
 
-func leArquivo() []string {
+func leArquivoTxt() []string {
 
 	var sites []string
 	resp, err := os.Open("sites.txt")
@@ -129,10 +132,32 @@ func leArquivo() []string {
 		if err == io.EOF {
 			break
 		}
+
 	}
 
 	resp.Close()
 
 	return sites
+}
 
+func registraLog(site string, status bool) {
+	arquivo, err := os.OpenFile("Log.txt", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+
+	if err != nil {
+		fmt.Println("Ocorreu um erro ao abrir o arquivo")
+	}
+
+	arquivo.WriteString(time.Now().Format("02/01/2006 15:04:05") + " URL: " + site + " - está com o status: " + strconv.FormatBool(status) + "\n")
+	arquivo.Close()
+}
+
+func exibeLogs() {
+
+	arquivo, err := ioutil.ReadFile("Log.txt")
+
+	if err != nil {
+		fmt.Println("Ocorreu um erro ao ler o arquivo Logs")
+	}
+
+	fmt.Println(string(arquivo))
 }
