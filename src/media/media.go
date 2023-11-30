@@ -18,15 +18,11 @@ func main() {
 	fmt.Print("3º: ")
 	fmt.Scan(&c)
 
-	_, _, media := calculamedia(a, b, c)
-	fmt.Println(media)
+	msg, media := calculamedia(a, b, c)
+	fmt.Println(msg, media)
 
 }
-func calculamedia(valorA float32, valorB float32, valorC float32) (float32, float32, float32) {
+func calculamedia(valorA float32, valorB float32, valorC float32) (string, float32) {
 
-	soma := (valorA + valorB + valorC)
-	divisao := soma / 3
-	valortotal := divisao
-
-	return soma, divisao, valortotal
+	return "Sua média é:", (valorA + valorB + valorC) / 3
 }
