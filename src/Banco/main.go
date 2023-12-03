@@ -1,30 +1,28 @@
 package main
 
-import "fmt"
-
-type ContaCorrente struct {
-	titular       string
-	numeroAgencia int
-	numeroConta   int
-	saldo         float32
-}
+import (
+	clientes "Banco/clientes"
+	contas "Banco/contas"
+	"fmt"
+)
 
 func main() {
 
-	contadoWasley := ContaCorrente{
-
-		titular:       "Wasley",
-		numeroAgencia: 153,
-		numeroConta:   225123,
-		saldo:         254.90,
+	contadoWasley := contas.ContaCorrente{
+		Titular: clientes.Titular{
+			Nome:         "Wasley",
+			Sobrenome:    "Fernando",
+			NomeExibicao: "Waasleey",
+			TitularCPF:   "111.111.111.10",
+			Profissao:    "Analista",
+		},
+		NumeroAgencia: 111,
+		NumeroConta:   225110,
 	}
 
-	contadoFernando := ContaCorrente{
-		titular:       "Fernando",
-		numeroAgencia: 153,
-		numeroConta:   2252371,
-		saldo:         251.87,
-	}
-	fmt.Println(contadoWasley)
-	fmt.Println(contadoFernando)
+	fmt.Println(contadoWasley.ExibeSaldo())
+
+	contadoWasley.Depositar(200)
+	fmt.Println(contadoWasley.ExibeSaldo())
+
 }

@@ -1,0 +1,50 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    env:
+      SCYLLA_VERSION: 4.2.0
+      GOBIN: ./bin
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Go 1.17
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.17
+
+      - name: Cache Dependencies
+        uses: actions/cache@v3
+        id: gomod-cache
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('go.mod') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Make Directory for GOBIN
+        run: mkdir -p ${GOBIN}
+
+      - name: Download Dependencies
+        run: make get-deps
+
+#       - name: Lint
+#         uses: golangci/golangci-lint-action@v3
+#         with:
+#           version: v1.45.2
+          
+      - name: Run Scylla Container
+        run: make run-scylla
+      
+      - name: Test
+        run: make test
